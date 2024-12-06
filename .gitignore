@@ -1,49 +1,75 @@
-# History files
-.Rhistory
-.Rapp.history
+makeVector <- function(x) {
+  m <- NULL
+  set <- function(y) {
+    x <<- y
+    m <<- NULL
+  }
+  get <- function() x
+  setmean <- function(mean) m <<- mean
+  getmean <- function() m
+  list(set = set, get = get,
+       setmean = setmean,
+       getmean = getmean)
+}
+v <- makeVector(c(4,10,15))
+v$get()
+v$set(c(5,11,16))
+v$get()
+v$getmean()
+v$setmean(6)
+v$getmean()
 
-# Session Data files
-.RData
-.RDataTmp
 
-# User-specific files
-.Ruserdata
+cachemean <- function(x, ...) {
+  m <- x$getmean()
+  if(!is.null(m)) {
+    message("getting cached data")
+    return(m)
+  }
+  data <- x$get()
+  m <- mean(data, ...)
+  x$setmean(m)
+  m
+}
+cachemean(v)
 
-# Example code in package build process
-*-Ex.R
+###################################
 
-# Output files from R CMD build
-/*.tar.gz
+makeCacheMatrix <- function(x = matrix()) {
+  inv <- NULL 
+  
+  set <- function(y) {
+    x <<- y
+    inv <<- NULL  
+  }
+  
+  get <- function() x
+  
+  setInverse <- function(inverse) inv <<- inverse
+  
+  getInverse <- function() inv
 
-# Output files from R CMD check
-/*.Rcheck/
+  list(set = set, get = get,
+       setInverse = setInverse,
+       getInverse = getInverse)
+}
 
-# RStudio files
-.Rproj.user/
+cacheSolve <- function(x, ...) {
+  inv <- x$getInverse()
+  if (!is.null(inv)) {
+    message("getting cached data") 
+    return(inv)  
+  }
+  
+  mat <- x$get()  
+  inv <- solve(mat, ...)  
+  x$setInverse(inv)  
+  inv  
+}
 
-# produced vignettes
-vignettes/*.html
-vignettes/*.pdf
+mat <- matrix(c(1, 2, 3, 4), nrow = 2, ncol = 2)
 
-# OAuth2 token, see https://github.com/hadley/httr/releases/tag/v0.3
-.httr-oauth
+cacheMat <- makeCacheMatrix(mat)
 
-# knitr and R markdown default cache directories
-*_cache/
-/cache/
+cacheSolve(cacheMat)  
 
-# Temporary files created by R markdown
-*.utf8.md
-*.knit.md
-
-# R Environment Variables
-.Renviron
-
-# pkgdown site
-docs/
-
-# translation temp files
-po/*~
-
-# RStudio Connect folder
-rsconnect/
